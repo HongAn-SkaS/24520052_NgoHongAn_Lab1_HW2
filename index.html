@@ -1,0 +1,96 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drum Kit Engine</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Drum Kit Engine</h1>
+        <p>Press a key or click a drum pad to play a sound.</p>
+    </header>
+
+    <main>
+        <section id="drum-kit" aria-label="Drum pads">
+            <button
+                class="drum-pad"
+                data-key="a"
+                data-sound="sounds/clap.wav"
+                aria-label="Play clap sound"
+                type="button"
+            >A</button>
+
+            <button
+                class="drum-pad"
+                data-key="s"
+                data-sound="sounds/hihat.wav"
+                aria-label="Play hi-hat sound"
+                type="button"
+            >S</button>
+
+            <button
+                class="drum-pad"
+                data-key="d"
+                data-sound="sounds/kick.wav"
+                aria-label="Play kick sound"
+                type="button"
+            >D</button>
+
+            <button
+                class="drum-pad"
+                data-key="f"
+                data-sound="sounds/openhat.wav"
+                aria-label="Play open hi-hat sound"
+                type="button"
+            >F</button>
+
+            <button
+                class="drum-pad"
+                data-key="g"
+                data-sound="sounds/boom.wav"
+                aria-label="Play boom sound"
+                type="button"
+            >G</button>
+
+            <button
+                class="drum-pad"
+                data-key="h"
+                data-sound="sounds/ride.wav"
+                aria-label="Play ride cymbal sound"
+                type="button"
+            >H</button>
+
+            <button
+                class="drum-pad"
+                data-key="j"
+                data-sound="sounds/snare.wav"
+                aria-label="Play snare sound"
+                type="button"
+            >J</button>
+        </section>
+
+        <section id="recorder" aria-label="Beat recorder">
+            <h2>Beat Recorder</h2>
+
+            <button
+                id="record-btn"
+                type="button"
+                aria-pressed="false"
+            >Record</button>
+
+            <button id="play-btn" type="button">Play Beat</button>
+
+            <button id="clear-btn" type="button">Clear</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>Drum Kit Engine</p>
+    </footer>
+</body>
+</html>
+```
