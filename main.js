@@ -81,7 +81,17 @@ function playPadByKey(key) {
         return;
     }
 
+    
     audioEngine.playSound(pad.dataset.sound);
+
+    // Record the key and its relative timestamp.
+    if (isRecording) {
+    beatQueue.push({
+        key: normalizedKey,
+        timestamp: performance.now() - recordingStartTime
+        });
+    }
+
 
     pad.classList.add("active");
 
@@ -103,3 +113,86 @@ window.addEventListener("keydown", (e) => {
 
     playPadByKey(e.key);
 });
+
+
+
+ // Step 4: FIFO Beat Recorder state.
+let isRecording = false;
+let isPlaying = false;
+let beatQueue = [];
+let recordingStartTime = 0;
+
+const recordButton = document.querySelector("#record-btn");
+const playButton = document.querySelector("#play-btn");
+const clearButton = document.querySelector("#clear-btn");
+
+// Update the Play button based on the recorded beat queue.
+function updateRecorderUI() {
+    playButton.disabled = beatQueue.length === 0 || isPlaying;
+}
+
+// Start or stop recording.
+recordButton.addEventListener("click", () => {
+    if (isRecording) {
+        isRecording = false;
+        recordButton.setAttribute("aria-pressed", "false");
+        recordButton.textContent = "Record";
+    } else {
+        if (isPlaying) {
+            return;
+        }
+
+        isRecording = true;
+        recordingStartTime = performance.now();
+        beatQueue = [];
+
+        recordButton.setAttribute("aria-pressed", "true");
+        recordButton.textContent = "Stop";
+
+        updateRecorderUI();
+    }
+});
+
+// Play the recorded beat in FIFO order.
+playButton.addEventListener("click", () => {
+    if (beatQueue.length === 0 || isPlaying || isRecording) {
+        return;
+    }
+
+    isPlaying = true;
+    updateRecorderUI();
+
+    const recordedBeat = [...beatQueue];
+    let previousTimestamp = 0;
+
+    
+    let elapsedTime = 0;
+
+    recordedBeat.forEach((event, index) => {
+        const delta = event.timestamp - elapsedTime;
+        elapsedTime = event.timestamp;
+
+        setTimeout(() => {
+            playPadByKey(event.key);
+
+            if (index === recordedBeat.length - 1) {
+                isPlaying = false;
+                updateRecorderUI();
+            }
+        }, elapsedTime);
+});
+
+});
+
+// Clear the recorded beat queue.
+clearButton.addEventListener("click", () => {
+    if (isPlaying) {
+        return;
+    }
+
+    beatQueue = [];
+    updateRecorderUI();
+});
+
+// Initialize the recorder UI.
+updateRecorderUI();
