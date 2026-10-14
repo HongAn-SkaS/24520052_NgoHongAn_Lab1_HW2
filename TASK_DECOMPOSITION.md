@@ -2,332 +2,210 @@
 
 ## 1. Project Overview
 
-**Project:** HW2 — Drum Kit Engine  
-**Methodology:** Work Breakdown Structure (WBS) + Contract-First Development  
-**Technology Stack:** Vanilla HTML5, Modern CSS, ES6+ JavaScript
+- **Project:** HW2 — Drum Kit Engine
+- **Methodology:** Work Breakdown Structure (WBS) + Contract-First Development
+- **Technology Stack:** Vanilla HTML5, Modern CSS, ES6+ JavaScript
 
 ### Technical Constraints
 
-- Use only Vanilla HTML5, CSS, and ES6+ JavaScript.
-- Do not use jQuery, Bootstrap, Tailwind CSS, or external CDNs.
-- Follow Contract-First Development: define and commit the HTML data contract before implementing JavaScript.
-- Each step must be completed and verified independently.
-- Each step must produce exactly one atomic commit.
-- Do not implement all features in a single AI-generated solution. One-shot AI implementation receives zero points.
-- Every step must have explicit verification criteria.
-- The implementation must support live defense: when the instructor changes key bindings, the developer must be able to refactor and verify the change within three minutes.
+1. Only Vanilla HTML5, CSS, and ES6+ JavaScript are allowed.
+2. Do not use jQuery, Bootstrap, Tailwind CSS, or external CDNs.
+3. Define and commit the HTML data contract before implementing JavaScript.
+4. Complete and verify each task independently.
+5. Each WBS task must produce exactly one atomic commit.
+6. Do not implement all features in one AI-generated solution.
+7. Each task must have explicit verification criteria.
+8. The implementation must support live defense: changing a keyboard binding must be possible within three minutes.
 
 ---
 
 ## 2. Work Breakdown Structure (WBS)
 
-### Step 1 — HTML Data-Sound Contract
+| WBS ID | Task | Main Activities | Deliverables | Commit Message |
+|---|---|---|---|---|
+| 1.0 | HTML Data-Sound Contract | Define `data-key`, `data-sound`, and `data-pad` for every drum pad | `index.html` | `feat(html): define drum pad data-sound contract` |
+| 2.0 | Polyphonic Audio Engine | Initialize audio, resolve sound IDs, support overlapping playback, handle errors | `js/audio-engine.js` | `feat(audio): implement polyphonic playback engine` |
+| 3.0 | Keyboard Controller | Read key mappings from HTML, trigger sounds, suppress repeated key events | `js/keyboard-controller.js` | `feat(input): add keyboard controller with repeat throttling` |
+| 4.0 | FIFO Beat Recorder | Capture activation events and timestamps, store and retrieve events in FIFO order | `js/beat-recorder.js` | `feat(recorder): implement FIFO timestamped beat recorder` |
+
+### 2.1. Step 1 — HTML Data-Sound Contract
 
 **WBS ID:** 1.0
 
-#### Objective
+**Objective:** Define the HTML interface connecting keyboard bindings, drum pads, and sound identifiers before writing JavaScript.
 
-Define the HTML interface contract that connects drum pads, keyboard bindings, and sound identifiers.
+**Requirements:**
+- Every drum pad must define `data-key`, `data-sound`, and `data-pad`.
+- Each `data-pad` must be unique.
+- Keyboard bindings must be explicit and unambiguous.
+- Sound identifiers must be stable and supported by the planned audio engine.
+- JavaScript must read the contract instead of relying on hardcoded DOM positions or duplicated mappings.
 
-The HTML contract must be completed and committed before any JavaScript implementation begins.
+**Files:** `index.html` and relevant CSS files if basic pad styling is needed.
 
-#### Files Involved
+**Verification:**
+- [ ] All pads contain the three required attributes.
+- [ ] Pad identifiers are unique.
+- [ ] Key bindings and sound identifiers are consistent.
+- [ ] The key-to-sound mapping can be understood by inspecting HTML.
+- [ ] The contract is committed before any JavaScript implementation.
 
-- `index.html`
-- Relevant CSS files, only if basic pad styling is required.
-
-#### Contract
-
-Each drum pad must expose the following HTML data attributes:
-
-- `data-key`: Keyboard key associated with the pad.
-- `data-sound`: Stable sound identifier used by the audio engine.
-- `data-pad`: Unique identifier for the drum pad.
-
-Contract requirements:
-
-1. Every drum pad must have all three attributes.
-2. Every `data-key` value must correspond to a valid keyboard binding.
-3. Every `data-sound` value must identify a sound supported by the planned audio engine.
-4. Every `data-pad` value must uniquely identify its pad.
-5. JavaScript must consume these attributes instead of relying on hardcoded DOM positions or duplicated key-to-sound mappings.
-6. Changing a key binding in the HTML must not require rewriting the audio playback engine.
-
-#### Verification Criteria
-
-- [ ] All drum pads contain `data-key`, `data-sound`, and `data-pad`.
-- [ ] Each pad has a unique `data-pad` identifier.
-- [ ] Each keyboard binding is represented explicitly in the HTML contract.
-- [ ] Sound identifiers are stable and consistent.
-- [ ] The HTML can be inspected to determine the key-to-sound mapping without reading JavaScript.
-- [ ] The contract commit exists before any JavaScript implementation commit.
-
-#### Commit Message
-
-`feat(html): define drum pad data-sound contract`
-
-#### Prompt Link
-
-<!-- Add the prompt/documentation link here. -->
+**Commit:** `feat(html): define drum pad data-sound contract`
 
 ---
 
-### Step 2 — Polyphonic Audio Playback Engine
+### 2.2. Step 2 — Polyphonic Audio Playback Engine
 
 **WBS ID:** 2.0
 
-#### Objective
+**Objective:** Implement an audio engine that plays sounds independently of keyboard events and UI rendering.
 
-Implement an audio playback engine that supports overlapping drum sounds without depending on UI event handling.
+**Requirements:**
+- Initialize or prepare the audio subsystem when needed.
+- Resolve a sound identifier to its corresponding audio resource.
+- Provide an interface to request playback by sound ID.
+- Support overlapping playback without unnecessarily stopping previous sounds.
+- Handle unknown sound identifiers and unavailable resources safely.
+- Keep keyboard listeners, pad highlighting, and recording logic outside the engine.
 
-The engine must be responsible for sound playback only. Keyboard listeners, visual pad interactions, and recording logic must remain outside the audio engine.
+**Files:** `js/audio-engine.js`; `index.html` only if a script reference is needed.
 
-#### Files Involved
+**Verification:**
+- [ ] A valid sound ID triggers the correct sound.
+- [ ] Multiple sounds can overlap.
+- [ ] Unknown sound IDs are handled safely.
+- [ ] Playback can be tested without keyboard input or the recorder.
+- [ ] Browser audio restrictions and user-gesture requirements are handled.
 
-- `js/audio-engine.js`
-- `index.html`, only if an external JavaScript file reference must be added.
-
-#### Contract
-
-The audio engine consumes a sound identifier defined by the HTML `data-sound` contract.
-
-Responsibilities:
-
-1. Initialize or prepare the audio subsystem when required.
-2. Resolve a sound identifier to its corresponding audio resource.
-3. Play a requested sound without requiring a keyboard event or DOM element.
-4. Support polyphonic playback, allowing multiple sounds to overlap.
-5. Keep audio playback logic independent of UI rendering and keyboard bindings.
-6. Handle unknown sound identifiers and unavailable audio resources without silently breaking the application.
-
-The engine must not own:
-
-- Keyboard event listeners.
-- Drum pad DOM selection.
-- Pad highlighting or other UI updates.
-- Beat recording or FIFO queue management.
-
-#### Verification Criteria
-
-- [ ] The audio engine can be invoked independently of keyboard input.
-- [ ] A valid sound identifier triggers the corresponding sound.
-- [ ] Multiple playback requests can overlap without one request unnecessarily stopping another.
-- [ ] An unknown sound identifier is handled safely.
-- [ ] The audio engine does not depend on hardcoded keyboard bindings.
-- [ ] Audio playback can be tested without implementing the recorder.
-- [ ] Browser audio restrictions, including user-gesture requirements, are handled appropriately.
-
-#### Commit Message
-
-`feat(audio): implement polyphonic playback engine`
-
-#### Prompt Link
-
-<!-- Add the prompt/documentation link here. -->
+**Commit:** `feat(audio): implement polyphonic playback engine`
 
 ---
 
-### Step 3 — Keyboard Listener and Repeat Throttling
+### 2.3. Step 3 — Keyboard Controller and Repeat Throttling
 
 **WBS ID:** 3.0
 
-#### Objective
+**Objective:** Translate keyboard input into playback requests using the HTML data contract.
 
-Implement keyboard input handling that translates keyboard events into sound playback requests using the HTML data contract.
+**Requirements:**
+- Read `data-key`, `data-sound`, and `data-pad` from drum pads.
+- Normalize keyboard input consistently before matching bindings.
+- Request playback through the audio engine.
+- Use `event.repeat` to suppress repeated playback when a key is held.
+- Ignore unmapped keys.
+- Avoid unintended activation while typing in editable controls.
+- Keep keyboard mappings out of the audio engine.
 
-Prevent a held key from generating an uncontrolled number of playback requests through `event.repeat` throttling.
+**Files:** `js/keyboard-controller.js`; integration with `js/audio-engine.js` and `index.html` if needed.
 
-#### Files Involved
+**Verification:**
+- [ ] A mapped key triggers the correct sound.
+- [ ] An unmapped key does nothing.
+- [ ] Holding a key does not repeatedly trigger playback through repeated `keydown` events.
+- [ ] Releasing and pressing the key again triggers playback normally.
+- [ ] Changing `data-key` updates the binding without modifying the audio engine.
+- [ ] Typing in editable controls does not trigger drum sounds.
 
-- `js/keyboard-controller.js`
-- `js/audio-engine.js`, integration only.
-- `index.html`, only if a script reference must be added.
-
-#### Contract
-
-The keyboard controller must derive its bindings from the drum pad HTML attributes:
-
-- `data-key`: Determines which keyboard key activates a pad.
-- `data-sound`: Identifies the sound to request from the audio engine.
-- `data-pad`: Identifies the corresponding pad for UI interaction or future event tracking.
-
-Responsibilities:
-
-1. Listen for keyboard input.
-2. Normalize keyboard input consistently before matching it against `data-key`.
-3. Resolve the pressed key through the HTML contract.
-4. Request playback from the audio engine using `data-sound`.
-5. Use `event.repeat` to prevent repeated playback caused by holding a key.
-6. Ignore unrelated keys and avoid unintended activation when typing in editable form controls.
-7. Keep keyboard mapping separate from the audio playback implementation.
-
-The controller must not duplicate the key-to-sound mapping in a hardcoded JavaScript lookup table.
-
-#### Verification Criteria
-
-- [ ] Pressing a mapped key triggers the correct sound.
-- [ ] Pressing an unmapped key does not trigger a sound.
-- [ ] Holding a mapped key does not repeatedly trigger playback through repeated `keydown` events.
-- [ ] Pressing a key again after releasing it triggers playback normally.
-- [ ] The controller obtains mappings from HTML data attributes.
-- [ ] Changing a pad's `data-key` value changes its keyboard binding without modifying the audio engine.
-- [ ] Keyboard input does not interfere with typing in editable controls.
-- [ ] The keyboard controller can be tested independently of the beat recorder.
-
-#### Commit Message
-
-`feat(input): add keyboard controller with repeat throttling`
-
-#### Prompt Link
-
-<!-- Add the prompt/documentation link here. -->
+**Commit:** `feat(input): add keyboard controller with repeat throttling`
 
 ---
 
-### Step 4 — FIFO Beat Recorder
+### 2.4. Step 4 — FIFO Beat Recorder
 
 **WBS ID:** 4.0
 
-#### Objective
+**Objective:** Record drum activation events in chronological order using a First-In, First-Out (FIFO) queue.
 
-Implement a First-In, First-Out (FIFO) beat recorder that captures drum activation events in chronological order using timestamps.
+**Requirements:**
 
-The recorder must remain independent of keyboard event listeners, audio playback implementation, and UI rendering.
+Each event must contain:
+- `timestamp`: Capture time from a consistent clock.
+- `data-key`: Keyboard binding associated with the activation.
+- `data-sound`: Sound identifier.
+- `data-pad`: Activated pad identifier.
 
-#### Files Involved
+The recorder must:
+- Append events to the end of the queue.
+- Retrieve or process events in insertion order.
+- Capture timestamps when events occur, not when they are later processed.
+- Avoid duplicate events caused by repeated keydown events.
+- Expose a clear interface for recording and retrieving events.
+- Remain independent of keyboard listeners, audio resource management, and UI rendering.
 
-- `js/beat-recorder.js`
-- `js/keyboard-controller.js`, integration only.
-- `js/audio-engine.js`, integration only if required by the event flow.
+**Files:** `js/beat-recorder.js`; integration with the keyboard controller and audio engine if required.
 
-#### Contract
+**Verification:**
+- [ ] Each accepted activation creates a timestamped event.
+- [ ] Events remain in FIFO order.
+- [ ] Each event contains the correct key, sound, and pad identifiers.
+- [ ] Timestamps use a consistent time source.
+- [ ] Repeated keydown events do not create duplicate recording events.
+- [ ] The recorder can be tested using simulated events without audio playback.
+- [ ] Start, stop, and retrieval operations behave consistently.
 
-The recorder receives normalized drum activation events based on the existing HTML contract.
-
-Each recorded event must contain:
-
-- `timestamp`: The time at which the drum activation was captured, using a consistent time source.
-- `data-key`: The keyboard binding associated with the activation.
-- `data-sound`: The sound identifier associated with the activation.
-- `data-pad`: The identifier of the activated drum pad.
-
-Implementation requirements:
-
-1. Store events in a FIFO queue.
-2. Append new events to the end of the queue.
-3. Process or retrieve events in their original insertion order.
-4. Record timestamps when activation events are captured, not when they are eventually processed.
-5. Use a consistent time source for all recorded events.
-6. Keep recording logic independent of DOM rendering and audio resource management.
-7. Ensure that the recorder captures valid activation events without duplicating events caused by repeated `keydown` events.
-8. Define a clear interface for starting, stopping, and retrieving recorded events if these operations are required by the implementation.
-
-The recorder must not implement its own keyboard listener or duplicate the HTML key-binding configuration.
-
-#### Verification Criteria
-
-- [ ] Each accepted drum activation creates a timestamped event.
-- [ ] Events are appended to the end of the FIFO queue.
-- [ ] Events are retrieved or processed in the order they were recorded.
-- [ ] Timestamps use a consistent clock and preserve event ordering.
-- [ ] Recorded events retain the correct key, sound, and pad identifiers.
-- [ ] Repeated `keydown` events suppressed by the keyboard controller do not create duplicate recording events.
-- [ ] The recorder can be tested with simulated events without requiring actual audio playback.
-- [ ] Recording logic does not depend on UI rendering.
-- [ ] Starting, stopping, and retrieving recordings behave consistently according to the implemented interface.
-
-#### Commit Message
-
-`feat(recorder): implement FIFO timestamped beat recorder`
-
-#### Prompt Link
-
-<!-- Add the prompt/documentation link here. -->
+**Commit:** `feat(recorder): implement FIFO timestamped beat recorder`
 
 ---
 
 ## 3. Dependency Order
 
-The implementation must follow the dependency order below.
-
-| Order | WBS ID | Task | Depends On |
+| Order | WBS ID | Task | Dependency |
 |---|---|---|---|
 | 1 | 1.0 | HTML Data-Sound Contract | None |
-| 2 | 2.0 | Polyphonic Audio Engine | Step 1 contract |
-| 3 | 3.0 | Keyboard Listener and Repeat Throttling | Steps 1 and 2 |
+| 2 | 2.0 | Polyphonic Audio Engine | Step 1 |
+| 3 | 3.0 | Keyboard Controller | Steps 1 and 2 |
 | 4 | 4.0 | FIFO Beat Recorder | Steps 1, 2, and 3 integration |
 
-**Mandatory rule:** Step 1 must be committed and verified before any JavaScript implementation begins.
-
-The audio engine must remain independent of the keyboard controller. The recorder must consume activation events through a defined interface rather than owning the keyboard listener.
+**Mandatory rule:** Step 1 must be verified and committed before JavaScript implementation begins.
 
 ---
 
 ## 4. Atomic Commit Policy
 
-Each WBS step must be implemented, verified, and committed separately.
+Each WBS task must be completed, tested, and committed separately.
 
-| Step | Commit Message | Acceptance Gate |
-|---|---|---|
-| 1 | `feat(html): define drum pad data-sound contract` | HTML contract verified |
-| 2 | `feat(audio): implement polyphonic playback engine` | Independent and overlapping playback verified |
-| 3 | `feat(input): add keyboard controller with repeat throttling` | Key mapping and repeat suppression verified |
-| 4 | `feat(recorder): implement FIFO timestamped beat recorder` | Timestamped FIFO recording verified |
-
-Rules:
-
-1. One step equals one atomic commit.
-2. Do not combine all four steps into one commit.
-3. Do not begin the next step before verifying the current step.
-4. Keep each commit limited to the files and changes required for its task.
-5. If a step fails verification, fix and verify it before proceeding.
-6. Keep commit history available for review and live defense.
-7. Document the prompt link for each step when the corresponding prompt is available.
+1. One WBS task equals one atomic commit.
+2. Do not combine multiple tasks into one commit.
+3. Do not start the next task before the current task passes verification.
+4. Limit each commit to the files and changes required for that task.
+5. Fix and retest failed verification before proceeding.
+6. Preserve commit history for review and live defense.
+7. Document the prompt or documentation link for each task when available.
 
 ---
 
-## 5. Live Defense: Three-Minute Key-Binding Refactor
+## 5. Live Defense — Three-Minute Key-Binding Refactor
 
-### Objective
+**Scenario:** The instructor requests a different keyboard binding for a drum pad.
 
-Demonstrate that keyboard bindings are controlled by the HTML contract rather than hardcoded into the JavaScript implementation.
+**Procedure:**
+1. Locate the target pad in `index.html`.
+2. Change its `data-key` value to the requested key.
+3. Confirm the keyboard controller reads the updated contract.
+4. Press the new key and verify the correct sound plays.
+5. Press the old key and verify it no longer activates that pad, unless another pad uses that binding.
+6. Confirm other pads and recording behavior remain correct.
 
-### Defense Scenario
-
-The instructor changes a drum pad's keyboard binding.
-
-### Expected Procedure
-
-1. **Inspect the HTML contract:** Locate the relevant pad and its `data-key` attribute.
-2. **Update the binding:** Change the attribute to the instructor's requested key, ensuring the binding remains unique.
-3. **Verify the mapping:** Confirm that the keyboard controller resolves the updated binding from the HTML.
-4. **Test the new key:** Press the new key and confirm that the correct sound plays.
-5. **Test the old key:** Confirm that the old binding no longer activates that pad, unless another pad explicitly uses it.
-6. **Check regression:** Confirm that other pads and the audio engine still work.
-
-### Acceptance Criteria
-
-- [ ] The refactor is completed within three minutes.
-- [ ] No hardcoded key-to-sound lookup needs to be rewritten.
-- [ ] The audio playback engine remains unchanged.
-- [ ] The recorder continues to capture the correct key, sound, and pad identifiers.
-- [ ] The updated behavior is demonstrated successfully.
+**Acceptance criteria:**
+- [ ] Complete the refactor within three minutes.
+- [ ] No hardcoded key-to-sound mapping needs to be rewritten.
+- [ ] The audio engine remains unchanged.
+- [ ] Recorded events contain the updated key and correct sound/pad identifiers.
+- [ ] No regression is introduced.
 
 ---
 
 ## 6. Definition of Done
 
-The HW2 implementation is complete when:
-
-- [ ] The HTML data contract was committed before JavaScript implementation.
-- [ ] All four WBS steps have separate atomic commits.
-- [ ] Every step passes its verification criteria.
-- [ ] Audio playback supports overlapping sounds.
-- [ ] Keyboard input uses the HTML contract and suppresses repeated `keydown` events.
-- [ ] The recorder stores timestamped activation events in FIFO order.
-- [ ] Audio, input handling, and recording logic remain appropriately separated.
+- [ ] The HTML contract is committed before JavaScript implementation.
+- [ ] All four WBS tasks have separate atomic commits.
+- [ ] Every task passes its verification criteria.
+- [ ] The audio engine supports overlapping playback.
+- [ ] The keyboard controller reads HTML bindings and suppresses repeated keydown events.
+- [ ] The recorder stores timestamped events in FIFO order.
+- [ ] Audio, keyboard input, and recording responsibilities remain separated.
 - [ ] No prohibited libraries or external CDNs are used.
-- [ ] The three-minute live-defense scenario can be completed successfully.
-- [ ] Each step's prompt link is documented when available.
+- [ ] The three-minute live-defense scenario succeeds.
+- [ ] Prompt/documentation links are included when available.
 
-**Final principle:** Contract first, implement incrementally, verify every step, and preserve the ability to explain and refactor each component independently.
+**Final principle:** Define the contract first, implement one task at a time, verify each task independently, and preserve the ability to explain and refactor every component.
