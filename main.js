@@ -1,4 +1,4 @@
-```javascript
+``
 "use strict";
 
 class AudioEngine {
@@ -74,7 +74,7 @@ function playPadByKey(key) {
     const normalizedKey = key.toLowerCase();
 
     const pad = document.querySelector(
-        `.drum-pad[data-key="${normalizedKey}"]`
+    '.drum-pad[data-key="' + normalizedKey + '"]'
     );
 
     if (!pad) {
@@ -88,9 +88,17 @@ function playPadByKey(key) {
     setTimeout(() => {
         pad.classList.remove("active");
     }, 100);
-}
+} 
 
 // Expose the engine and helper for later steps.
 window.audioEngine = audioEngine;
 window.playPadByKey = playPadByKey;
-```
+
+
+// Listen for keyboard input.
+window.addEventListener("keydown", (e) => {
+    if (e.repeat) return;
+
+    const key = e.key;
+    playPadByKey(key);
+});
