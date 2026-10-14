@@ -97,8 +97,9 @@ window.playPadByKey = playPadByKey;
 
 // Listen for keyboard input.
 window.addEventListener("keydown", (e) => {
-    if (e.repeat) return;
+    if (e.repeat) {
+        return;
+    }
 
-    const key = e.key;
-    playPadByKey(key);
+    playPadByKey(e.key);
 });
